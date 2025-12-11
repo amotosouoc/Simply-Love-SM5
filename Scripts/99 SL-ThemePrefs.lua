@@ -14,6 +14,8 @@ if type(ThemePrefs) ~= "table" or type(ThemePrefs.Get) ~= "function" then
 	}
 end
 
+
+
 SL_CustomPrefs.Get = function()
 	 -- emojis are our lingua franca for the 21st century
 	local visualStyleChoices = { "❤", "↖", "🐻", "🦆", "😺", "🎃", "🌈", "⭐", "🤔", "🌀" }
@@ -142,6 +144,16 @@ SL_CustomPrefs.Get = function()
 			Default = true,
 			Choices = { THEME:GetString("ThemePrefs", "On"), THEME:GetString("ThemePrefs", "Off") },
 			Values  = { true, false }
+		},
+		RandomizeFirst =
+		{
+			Default = false,
+			Choices = { THEME:GetString("ThemePrefs", "Yes"), THEME:GetString("ThemePrefs", "No") },
+			Values  = { true, false }
+		},
+		RandomFirstGroup =
+		{
+			Default = "ALL SONGS",
 		},
 		-- - - - - - - - - - - - - - - - - - - -
 		-- SimplyLoveColor saves the theme color for the next time
@@ -389,6 +401,7 @@ SL_CustomPrefs.Validate = function()
 	end
 end
 
+
 SL_CustomPrefs.Init = function()
 	-- InitAll() is defined in _fallback/Scripts/02 ThemePrefsRows.lua
 	-- to init both the ThemePrefs and ThemePrefsRows tables.
@@ -401,5 +414,46 @@ SL_CustomPrefs.Init = function()
 	-- can be created in ./Save/ThemePrefs.ini if one was not found
 	ThemePrefs.Save()
 end
+
+function SL_OptionsRandomFirstGroup()
+	local choices = { "ALL SONGS" }
+
+	if SONGMAN and type(SONGMAN.GetSongGroupNames) == "function" then
+		local groups = SONGMAN:GetSongGroupNames()
+		for _, name in ipairs(groups) do
+			table.insert(choices, name)
+		end
+	end
+	
+	local row = {
+		Name = "RandomFirstGroup",
+		LayoutType="ShowOneInRow",
+		SelectType = "SelectOne",
+		OneChoiceForAllPlayers = true,
+		ExportOnChange = false,
+		Choices = choices,
+
+		LoadSelections = function(self, list, pn)
+			local current = ThemePrefs.Get("RandomFirstGroup") or "ALL SONGS"
+
+			for i = 1, #self.Choices do
+				list[i] = (self.Choices[i] == current)
+			end
+		end,
+
+		SaveSelections = function(self, list, pn)
+			for i = 1, #self.Choices do
+				if list[i] then
+					ThemePrefs.Set("RandomFirstGroup", self.Choices[i])
+					ThemePrefs.Save()
+					break
+				end
+			end
+		end
+	}
+
+	return row
+end
+
 
 SL_CustomPrefs.Init()
