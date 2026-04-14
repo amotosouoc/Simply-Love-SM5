@@ -214,6 +214,7 @@ local AutoSubmitRequestProcessor = function(res, overlay)
 							elseif gsEntry["isSelf"] then
 								entry:diffuse(color("#A1FF94"))
 								personalRank = gsEntry["rank"]
+								SL["P"..side].MachineTag = GetMachineTag(gsEntry)
 							end
 
 							if gsEntry["isFail"] then

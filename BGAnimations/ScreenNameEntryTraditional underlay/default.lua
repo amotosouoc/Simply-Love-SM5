@@ -36,11 +36,24 @@ local t = Def.ActorFrame {
 
 		for player in ivalues(Players) do
 			local wheel = AlphabetWheels[ToEnumShortString(player)]
+			local pn = ToEnumShortString(player)
 
 			if wheel then
 				local profile = PROFILEMAN:GetProfile(player)
-				-- if a profile is in use and has a HighScoreName, make the starting index 2 ("ok"); otherwise, 3 ("A")
-				local StartingCharIndex = (profile and (profile:GetLastUsedHighScoreName() ~= "") and 2) or 3
+				local isPersistentProfile = PROFILEMAN:IsPersistentProfile(player)
+				local StartingCharIndex = 3
+
+				if isPersisentProfile then
+					-- if a profile is in use and has a HighScoreName, make the starting index 2 ("ok"); otherwise, 3 ("A")
+					StartingCharIndex = (profile and (profile:GetLastUsedHighScoreName() ~= "") and 2) or 3
+				else
+					if SL[pn].MachineTag and SL[pn] ~= "" then
+						SL[pn].HighScores.Name = SL[pn].MachineTag
+						StartingCharIndex = 2
+						self:GetChild("PlayerNameAndDecorations_"..pn):GetChild("PlayerName"):queuecommand("Set")
+						SL[pn].MachineTag = ""
+					end
+				end
 
 				-- set_info_set() takes two arguments:
 				--		a table of meaningful data to divvy up to wheel items
